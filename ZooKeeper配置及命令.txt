@@ -1,0 +1,65 @@
+二：安装环境准备
+Zookeeper需在java环境下运行，因此在部署zookeeper环境前，需先安装JDK：
+# tar -zvxf jdk-7u11-linux-x64.gz
+# mv jdk1.7.0_11/ /usr/local/java
+# cd /usr/local/java/bin
+设置java环境变量，在/etc/profile文件中添加以下信息:
+
+export JAVA_HOME=/usr/local/java
+export CLASSPATH=.:$JAVA_HOME/jre/lib/rt.jar:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+export PATH=$PATH:$JAVA_HOME/bin
+----使环境变量生效
+source /etc/profile
+------------------------------------------
+tar -zxvf zookeeper-3.4.5.tar.gz
+mv zookeeper-3.4.5.tar.gz /usr/local/zookeeper  
+cd /usr/local/zookeeper/conf
+cp zoo_sample.cfg zoo.cfg
+配置zoo.cfg，配置集群选项:
+
+# cat zoo.cfg
+tickTime=2000           (服务器与客户端的心跳时间)
+initLimit=10
+syncLimit=5
+dataDir=/zkdata/zookeeper  (保存数据目录，自定义)
+clientPort=2181         (客户端连接端口，可更改)
+server.1=192.168.70.2:2888:3888  (集群配置)
+server.2=192.168.70.3:2888:3888
+server.3=192.168.70.4:2888:3888
+---------配置完Server1，把zookeeper目录拷贝到Server2,Server3:
+scp -rp /usr/local/zookeeper 192.168.70.2:/usr/local/
+scp -rp /usr/local/zookeeper 192.168.70.3:/usr/local/
+scp -rp /usr/local/zookeeper 192.168.70.4:/usr/local/
+------------在各Server的dataDir目录下创建myid文件:
+Server1: 
+ #echo “1” >/zkdata/zookeeper/myid
+Server2: 
+ #echo “2” >/zkdata/zookeeper/myid
+Server3: 
+ #echo “3” >/zkdata/zookeeper/myid
+
+-----------在各Server上依次开启zookeeper服务:
+# /usr/local/zookeeper/bin/zkServer.sh start
+查看zookeeper状态:
+# /usr/local/zookeeper/bin/zkServer.sh status
+----------------五：测试zookeeper集群
+使用客户端软件连接leader服务器(假设选举出的leader为Server1)
+#/usr/local/zookeeper/bin/zkCli.sh -server  192.168.70.3
+
+---------------------------------
+使用 ls 命令来查看当前 ZooKeeper 中所包含的内容：
+ ls /
+------------创建了一个新的 znode 节点“ zk ”以及与它关联的字符串
+create /zk gaomjNode
+---------- get 命令来确认第二步中所创建的 znode 是否包含我们所创建的字符串
+get /zk
+--------------set 命令来对 zk 所关联的字符串进行设置
+set /zk gaomjNode2
+----------------------
+delete /zk
+------------------配置-myid
+在dataDir里会放置一个myid文件，里面就一个数字，用来唯一标识这个服务。
+这个id是很重要的，一定要保证整个集群中唯一。zookeeper会根据这个id来取出server.x上的配置。
+比如当前id为1，则对应着zoo.cfg里的server.1的配置。
+
+ 
