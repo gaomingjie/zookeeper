@@ -12,7 +12,12 @@ export PATH=$PATH:$JAVA_HOME/bin
 source /etc/profile
 ------------------------------------------
 tar -zxvf zookeeper-3.4.5.tar.gz
-mv zookeeper-3.4.5.tar.gz /usr/local/zookeeper  
+mv zookeeper-3.4.5.tar.gz /usr/local/zookeeper 
+------环境变量设置------------------------
+export ZOOKEEPER_HOME=/usr/local/zookeeper-3.4.6
+export PATH=$ZOOKEEPER_HOME/bin:$PATH
+#source /etc/profile
+------------------------------------------- 
 cd /usr/local/zookeeper/conf
 cp zoo_sample.cfg zoo.cfg
 配置zoo.cfg，配置集群选项:
@@ -44,7 +49,7 @@ Server3:
 # /usr/local/zookeeper/bin/zkServer.sh status
 ----------------五：测试zookeeper集群
 使用客户端软件连接leader服务器(假设选举出的leader为Server1)
-#/usr/local/zookeeper/bin/zkCli.sh -server  192.168.70.3
+#/usr/local/zookeeper-3.4.6/bin/zkCli.sh -server  192.168.70.3
 
 ---------------------------------
 使用 ls 命令来查看当前 ZooKeeper 中所包含的内容：
@@ -62,4 +67,45 @@ delete /zk
 这个id是很重要的，一定要保证整个集群中唯一。zookeeper会根据这个id来取出server.x上的配置。
 比如当前id为1，则对应着zoo.cfg里的server.1的配置。
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+------------------------------------------
+1. 启动ZK服务:       sh bin/zkServer.sh start
+2. 查看ZK服务状态: sh bin/zkServer.sh status
+3. 停止ZK服务:       sh bin/zkServer.sh stop
+4. 重启ZK服务:       sh bin/zkServer.sh restart
+
+1. 显示根目录下、文件： ls / 使用 ls 命令来查看当前 ZooKeeper 中所包含的内容
+2. 显示根目录下、文件： ls2 / 查看当前节点数据并能看到更新次数等数据
+3. 创建文件，并设置初始内容： create /zk "test" 创建一个新的 znode节点“ zk ”以及与它关联的字符串
+4. 获取文件内容： get /zk 确认 znode 是否包含我们所创建的字符串
+5. 修改文件内容： set /zk "zkbak" 对 zk 所关联的字符串进行设置
+6. 删除文件： delete /zk 将刚才创建的 znode 删除
+7. 退出客户端： quit
+8. 帮助命令： help
+--------------------------------
+1. 可以通过命令：echo stat|nc 127.0.0.1 2181 来查看哪个节点被选择作为follower或者leader
+2. 使用echo ruok|nc 127.0.0.1 2181 测试是否启动了该Server，若回复imok表示已经启动。
+3. echo dump| nc 127.0.0.1 2181 ,列出未经处理的会话和临时节点。
+4. echo kill | nc 127.0.0.1 2181 ,关掉server
+5. echo conf | nc 127.0.0.1 2181 ,输出相关服务配置的详细信息。
+6. echo cons | nc 127.0.0.1 2181 ,列出所有连接到服务器的客户端的完全的连接 / 会话的详细信息。
+7. echo envi |nc 127.0.0.1 2181 ,输出关于服务环境的详细信息（区别于 conf 命令）。
+8. echo reqs | nc 127.0.0.1 2181 ,列出未经处理的请求。
+9. echo wchs | nc 127.0.0.1 2181 ,列出服务器 watch 的详细信息。
+10. echo wchc | nc 127.0.0.1 2181 ,通过 session 列出服务器 watch 的详细信息，它的输出是一个与 watch 相关的会话的列表。
+11. echo wchp | nc 127.0.0.1 2181 ,通过路径列出服务器 watch 的详细信息。它输出一个与 session 相关的路径。
  
